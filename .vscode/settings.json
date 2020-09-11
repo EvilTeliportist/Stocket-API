@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/5874b983-afe3-49e1-9938-d9698908b78b/resourceGroups/RTStockData/providers/Microsoft.Web/sites/RTStockData",
+    "appService.deploySubpath": "."
+}
