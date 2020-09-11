@@ -11,46 +11,45 @@ var Connection = require('tedious').Connection;
         authentication: {
             type: 'default',
             options: {
-                userName: 'test123',
-                password: 'Password123!'
+                userName: 'test123', // CHANGE THESE TO ENV VARIABLES BEFORE PRODUCTION
+                password: 'Admin123!' // CHANGE THESE TO ENV VARIABLES BEFORE PRODUCTION
             }
         },
         options: {
-            // If you are on Microsoft Azure, you need encryption:
+            port: 1433,
             encrypt: true,
-            database: 'StockMarketData'
+            database: 'StockMarketData',
+            rowCollectionOnRequestCompletion: true
+        },
+        debug: {
+            packet: true,
+            data: true,
+            payload: true,
+            token: true
         }
-    };  
-    var connection = new Connection(config);  
-    connection.on('connect', function(err) {  
-        // If no error, then good to proceed.
-        console.log("Connected");  
-    });  
+};
 
-function SQLStatement(statement){
-    request = new Request(statement, function(err){
-        if (err) {
-            console.log(err)
-        }});
+var connection = new Connection(config);
 
-        var result = "";
-        request.on('row', function(columns){
-            columns.forEach(function(column){
-                if (column.value === null){
-                    console.log("NULL");
-                } else {
-                    result += column.value + " "
-                }
-            });
-            console.log(result);
-            result = ""
-        });
+connection.on('connect', function(err) {
+    if (err) {
+        console.log(err)
+    } else {
+        console.log("Connected!")
+    }
+})
 
-        request.on('done', function(rowCount, more){
-            console.log(rowCount + " rows returned");
-        });
-
-        connection.execSql(request)
+function executeStatement(res, s){
+    request = new Request(s, function(err, rowCount, rows) {
+        if (err){
+            console.log("SQLERROR: " + err)
+        } else {
+            console.log(rows)
+            res.json({
+                data: rows,
+            })
+        }})
+    connection.execSql(request)
 }
 
 
@@ -61,9 +60,7 @@ app.use(express.json());
 
 // Server request pathways
 app.get('/', (req, res) => {
-    res.json({
-        'response': 'you got a json response!'
-    })
+    executeStatement(res, "SELECT * FROM test")
 });
 
 
