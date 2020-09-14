@@ -3,6 +3,8 @@ const express = require('express');
 const sql = require('mssql')
 const SQLConnectionString = 'mssql://test123:Admin123!@rtstockproject.database.windows.net/StockMarketData?encrypt=true';
 const path = require('path');
+var crypto = require("crypto-js");
+
 
 const app = express();
 
@@ -189,7 +191,8 @@ app.get('/home', (req, res) => {
 
 app.post('/add_user', (req, res) => {
     email = req.body.email;
-    password = req.body.password;
+    password = crypto.SHA256(req.body.password).toString(crypto.enc.Hex);
+    console.log(password)
 
     let establishConnection = new Promise((resolve, reject) => {
         sql.connect(SQLConnectionString, function (err){
@@ -210,12 +213,11 @@ app.post('/add_user', (req, res) => {
         console.log(message)
     });
 
-    
 });
 
 app.post('/sign_in', (req, res) => {
     email = req.body.email;
-    password = req.body.password;
+    password = crypto.SHA256(req.body.password).toString(crypto.enc.Hex);
 
     let establishConnection = new Promise((resolve, reject) => {
         sql.connect(SQLConnectionString, function (err){
