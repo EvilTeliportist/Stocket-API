@@ -1,6 +1,6 @@
 
-const SIGN_UP_URL = 'http://localhost:8888/add_user';
-const SIGN_IN_URL = 'http://localhost:8888/sign_in';
+const SIGN_UP_URL = 'https://rtstockdata.azurewebsites.net/add_user';
+const SIGN_IN_URL = 'https://rtstockdata.azurewebsites.net/sign_in';
 
 $("form").submit(function(e){
     e.preventDefault();
@@ -35,12 +35,39 @@ $("#signup-submit").click(function () {
     const p1 = $("#signup-content").children()[1].value;
     const p2 = $("#signup-content").children()[2].value;
 
+
+    // Invalid email check
     if (!email.includes('@')){
         $("#signup-email").addClass('error');
         $("#signup-email").val("");
         $("#signup-email").attr("placeholder", "Invalid email.");
         return;
     }
+
+
+    // Max password length
+    if (p1.length > 30){
+        $("#signup-password").addClass('error')
+        $("#signup-password").val("");
+        $("#passconfirm").addClass('error')
+        $("#passconfirm").val("");
+        $("#signup-password").attr("placeholder", "Passwords must be less")
+        $("#passconfirm").attr("placeholder", "than 30 characters.")
+        return
+    }
+
+
+    // Min password length
+    if (p1.length < 7){
+        $("#signup-password").addClass('error')
+        $("#signup-password").val("");
+        $("#passconfirm").addClass('error')
+        $("#passconfirm").val("");
+        $("#signup-password").attr("placeholder", "Passwords must be at")
+        $("#passconfirm").attr("placeholder", "least 7 characters.")
+        return
+    }
+
 
     // Check if passwords match
     if (p1 == p2){
@@ -62,11 +89,25 @@ $("#signup-submit").click(function () {
                 $("#signup-email").addClass('error')
                 $("#signup-email").val("");
                 $("#signup-email").attr("placeholder", "User already exists.")
-            } else if (data.success){
+            } else if (data.message == 'alphanumeric') {
+                $("#signup-password").addClass('error')
+                $("#signup-password").val("");
+                $("#passconfirm").addClass('error')
+                $("#passconfirm").val("");
+                $("#signup-password").attr("placeholder", "Passwords must be")
+                $("#passconfirm").attr("placeholder", "alphanumeric")
+            } else if(data.message == 'bad chars') {
+                $("#signup-password").addClass('error')
+                $("#signup-password").val("");
+                $("#passconfirm").addClass('error')
+                $("#passconfirm").val("");
+                $("#signup-password").attr("placeholder", "We noticed some")
+                $("#passconfirm").attr("placeholder", "suspicous letters...")
+            } else if(data.success){
                 console.log("Log in was a success!");
                 document.cookie = 'email='+email;
                 document.cookie = 'password='+p1;
-                window.location.href = 'http://localhost:8888/dashboard'
+                window.location.href = 'https://rtstockdata.azurewebsites.net/dashboard'
             }
         });
     } else {
@@ -76,8 +117,6 @@ $("#signup-submit").click(function () {
         $("#passconfirm").attr("placeholder", "Passwords must match.")
         console.log("Passwords do not match.")
     }
-
-    
 });
 
 $("#signin-submit").click(function () {
@@ -116,11 +155,18 @@ $("#signin-submit").click(function () {
             $("#signin-email").addClass('error');
             $("#signin-email").val("");
             $("#signin-email").attr("placeholder", "No user exists.");
+        } else if(data.message == 'bad chars') {
+            $("#signin-password").addClass('error')
+            $("#signin-password").val("");
+            $("#signin-email").addClass('error')
+            $("#signin-email").val("");
+            $("#signin-email").attr("placeholder", "We noticed some")
+            $("#signin-password").attr("placeholder", "suspicous letters...")
         } else if (data.success){
             console.log("Log in was a success!");
             document.cookie = 'email='+email;
             document.cookie = 'password='+p1;
-            window.location.href = 'http://localhost:8888/dashboard'
+            window.location.href = 'https://rtstockdata.azurewebsites.net/dashboard'
         }
     });
 

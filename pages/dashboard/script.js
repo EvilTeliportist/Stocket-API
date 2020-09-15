@@ -4,7 +4,7 @@ var pass = $.cookie('password');
 const info = {'email':email, 'password': pass}
 
 
-fetch("http://localhost:8888/dashboard_data", {
+fetch("https://rtstockdata.azurewebsites.net/dashboard_data", {
     method: "POST",
     body: JSON.stringify(info),
     headers: {

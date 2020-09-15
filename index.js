@@ -202,52 +202,70 @@ app.post('/update', (req, res) => {
 
 app.post('/add_user', (req, res) => {
     email = req.body.email;
-    password = crypto.SHA256(req.body.password).toString(crypto.enc.Hex);
-    console.log(password)
+    p = req.body.password;
 
-    let establishConnection = new Promise((resolve, reject) => {
-        sql.connect(SQLConnectionString, function (err){
-            if (err) {
-                console.log(err)
-                reject("Connection Failed");
-            } else {
-                resolve('Connection Succeeded');
-            }
+    // Check if anything includes bad characters
+    if (p.includes("'") || p.includes('"') || p.includes(";") || email.includes("'") || email.includes('"') || email.includes(";")){
+        res.json({
+            success: false,
+            message: 'bad chars'
+        })
+    } else {
+        password = crypto.SHA256(p).toString(crypto.enc.Hex);
+        console.log(password)
+
+        let establishConnection = new Promise((resolve, reject) => {
+            sql.connect(SQLConnectionString, function (err){
+                if (err) {
+                    console.log(err)
+                    reject("Connection Failed");
+                } else {
+                    resolve('Connection Succeeded');
+                }
+            });
+        })
+
+        // Execute query after promise
+        establishConnection.then((message) => {
+            console.log(message)
+            addUser(res, email, password);
+        }).catch((message) => {
+            console.log(message)
         });
-    })
-
-    // Execute query after promise
-    establishConnection.then((message) => {
-        console.log(message)
-        addUser(res, email, password);
-    }).catch((message) => {
-        console.log(message)
-    });
-
+    }
 });
 
 app.post('/sign_in', (req, res) => {
     email = req.body.email;
-    password = crypto.SHA256(req.body.password).toString(crypto.enc.Hex);
+    p = req.body.password;
 
-    let establishConnection = new Promise((resolve, reject) => {
-        sql.connect(SQLConnectionString, function (err){
-            if (err) {
-                console.log(err)
-                reject("Connection Failed");
-            } else {
-                resolve('Connection Succeeded');
-            }
+    if (p.includes("'") || p.includes('"') || p.includes(";") || email.includes("'") || email.includes('"') || email.includes(";")){
+        res.json({
+            success: false,
+            message: 'bad chars'
+        })
+    } else {
+        password = crypto.SHA256(p).toString(crypto.enc.Hex);
+
+        let establishConnection = new Promise((resolve, reject) => {
+            sql.connect(SQLConnectionString, function (err){
+                if (err) {
+                    console.log(err)
+                    reject("Connection Failed");
+                } else {
+                    resolve('Connection Succeeded');
+                }
+            });
+        })
+
+        // Execute query after promise
+        establishConnection.then((message) => {
+            console.log(message)
+            validateUser(res, email, password);
+        }).catch((message) => {
+            console.log(message)
         });
-    })
-
-     // Execute query after promise
-     establishConnection.then((message) => {
-        console.log(message)
-        validateUser(res, email, password);
-    }).catch((message) => {
-        console.log(message)
-    });
+    }
    
 })
 
