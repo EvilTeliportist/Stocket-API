@@ -1,0 +1,112 @@
+#content-wrapper {
+    background-color:orange;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+}
+
+#text {
+    font-family: 'Overpass';
+    font-size: 32px;
+    color: white;
+}
+
+#token {
+    font-family: 'Overpass';
+    font-size: 32px;
+    color: white;
+}
+
+#break1 {
+    height: 3px;
+    margin: 20px auto;
+    background-color: white;
+    width: 40%;
+    border-radius: 5px;
+}
+
+img {
+    filter: invert(1);
+    width:350px;
+    height:350px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.info {
+    height: 100px;
+    width: 100px;
+    cursor: pointer;
+    transition: .3s;
+    opacity: 1;
+}
+
+.info:hover{
+    opacity: .6;
+}
+
+a {
+    font-family: 'Overpass';
+    font-size: 32px;
+    color: #777777;
+    text-decoration: none;
+    transition: .3s;
+    cursor: pointer;
+}
+
+a:hover {
+    color: #999999;
+}
+
+#main-content {
+    width: 80%;
+    margin: 10px auto;
+    background-color: white;
+    border-radius: 10px;
+    font-size: 32px;
+    padding: 10px;
+    padding-left: 30px;
+    padding-bottom: 0px;
+    color: #555555;
+    text-align: left;
+    margin-bottom: 50px;
+    display: none;
+}
+
+h2 {
+    margin-bottom: 10px;
+    font-size: 40px;
+}
+
+#break2 {
+    height: 3px;
+    margin: 20px 0;
+    background-color: #555555;
+    width: 30%;
+    border-radius: 5px;
+}
+
+p {
+    margin: 10 0;
+}
+
+#x {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    filter: invert(30%);
+    float: right;
+    cursor: pointer;
+    margin: 20px;
+    transition: .3s;
+}
+
+#x:hover {
+    filter: invert(70%);
+}

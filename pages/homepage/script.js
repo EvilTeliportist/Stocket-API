@@ -52,7 +52,8 @@ $("#signup-submit").click(function () {
             method: "POST",
             body: JSON.stringify(info),
             headers: {
-                'content-type':'application/json'
+                'content-type':'application/json',
+                'Accept': 'application/json'
             }
         }).then(res => res.json()).then(data => {
             // Deal with errors and messages
@@ -61,6 +62,11 @@ $("#signup-submit").click(function () {
                 $("#signup-email").addClass('error')
                 $("#signup-email").val("");
                 $("#signup-email").attr("placeholder", "User already exists.")
+            } else if (data.success){
+                console.log("Log in was a success!");
+                document.cookie = 'email='+email;
+                document.cookie = 'password='+p1;
+                window.location.href = 'http://localhost:8888/dashboard'
             }
         });
     } else {
@@ -110,6 +116,11 @@ $("#signin-submit").click(function () {
             $("#signin-email").addClass('error');
             $("#signin-email").val("");
             $("#signin-email").attr("placeholder", "No user exists.");
+        } else if (data.success){
+            console.log("Log in was a success!");
+            document.cookie = 'email='+email;
+            document.cookie = 'password='+p1;
+            window.location.href = 'http://localhost:8888/dashboard'
         }
     });
 

@@ -7,9 +7,10 @@ var crypto = require("crypto-js");
 
 
 const app = express();
-
 app.use(express.json());
 app.use(express.static(__dirname + '/pages'));
+
+
 
 // Functions --------------------------------------------
 function checkTickerSwitch(ticker){
@@ -38,6 +39,8 @@ function generate_token(length){
     return b.join("");
 }
 
+
+
 // Async Functions ---------------------------------------
 async function getData(res, s){
     connection = await sql.connect(SQLConnectionString);
@@ -51,20 +54,17 @@ async function addData(res, data){
 
     for (var ticker in data){
         replacedTicker = checkTickerSwitch(ticker)
-        console.log("Starting on " + ticker)
         for (var time in data[ticker]){
             try {
 
                 s = "INSERT INTO " + replacedTicker + " (datetime, price) VALUES (\'" + time + "\', " + data[ticker][time] + ");";
-
-                const result = await sql.query(s);
+                console.log(ticker + ":" + time)
+                // const result = await sql.query(s);
                 
             } catch (error) {
                 console.log(error);
             }
         }
-
-        console.log(ticker + " Done!")
     }
 
     res.json({
@@ -78,7 +78,10 @@ async function validateUser(res, email, pass){
     doesUserExist = result.recordset.length != 0;
     if (doesUserExist){
         if (pass == result.recordset[0]['password']){
-            // let them in
+            res.json({
+                success: true,
+                message: "redirect to dashboard"
+            })
         } else {
             res.json({
                 success: false,
@@ -122,10 +125,20 @@ async function addUser(res, email, pass){
     }
 }
 
+async function dashData(res, email, pass){
+    s = "SELECT token FROM users WHERE email = \'" + email + "\' AND password = \'" + pass + "\';"
+    result = await sql.query(s)
+    console.log(result)
+    res.json({
+        token: result.recordset[0].token
+    });
+}
+
+
 
 // Server request pathways -------------------------------
 app.get('/', (req, res) => {
-    res.redirect('/home')
+    res.sendFile(path.join(__dirname, '/pages/homepage/index.html'))
 })
 
 app.get('/request', (req, res) => {
@@ -157,8 +170,10 @@ app.get('/request', (req, res) => {
     
 });
 
-app.get('/update', (req, res) => {
+app.post('/update', (req, res) => {
     var hash = req.body.hash;
+    var data = req.body.data;
+
     if (hash == '7A6ECCDB792062797AA4F6BEE12199219EC8749641BA50B3138DD4857A65173D'){
         
         var data = req.body.data;
@@ -183,10 +198,6 @@ app.get('/update', (req, res) => {
             console.log(message)
         });
     }
-})
-
-app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname, '/pages/homepage/index.html'))
 })
 
 app.post('/add_user', (req, res) => {
@@ -240,8 +251,35 @@ app.post('/sign_in', (req, res) => {
    
 })
 
+app.get('/dashboard', (req, res) => {
+    res.send(path.join(__dirname, '/pages/dashboard/index.html'));
+});
+
+app.post('/dashboard_data', (req, res) => {
+    email = req.body.email;
+    password = crypto.SHA256(req.body.password).toString(crypto.enc.Hex);
+
+    let establishConnection = new Promise((resolve, reject) => {
+        sql.connect(SQLConnectionString, function (err){
+            if (err) {
+                console.log(err)
+                reject("Connection Failed");
+            } else {
+                resolve('Connection Succeeded');
+            }
+        });
+    })
+
+     // Execute query after promise
+     establishConnection.then((message) => {
+        dashData(res, email, password);
+    }).catch((message) => {
+        console.log(message)
+    });
+});
+
 // Start Listening -----------------------------------------
 const port = process.env.PORT || 8888;
 app.listen(port, () => {
-    console.log("Listening on https://localhost:" + port.toString());
+    console.log("Listening on " + port.toString());
   });
