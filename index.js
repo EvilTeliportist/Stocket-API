@@ -48,14 +48,14 @@ function sendEmailAlert(ticker, time, price, err){
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'evilteliportist@gmail.com',
-          pass: 'jklntcfy'
+          user: 'stocketapi@gmail.com',
+          pass: 'Jklntcfy123'
         }
     });
     
     var mailOptions = {
-    from: 'evilteliportist@gmail.com',
-    to: 'evilteliportist@gmail.com',
+    from: 'stocketapi@gmail.com',
+    to: 'brhoulton@gmail.com',
     subject: 'Stocket Error Reported',
     text: 'There was an error processing ' + ticker + " at " + time + " and price " + price + "\n\n\n" + err
     };
@@ -98,7 +98,7 @@ async function addData(res, data){
             } catch (error) {
                 console.log(error);
                 sqlError = true;
-                sendEmailAlert(ticker, time, data[ticker][price], error.toString())
+                sendEmailAlert(ticker, time, data[ticker][time], error.toString())
             }
         }
     }
