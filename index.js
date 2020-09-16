@@ -91,7 +91,7 @@ async function addData(res, data){
         for (var time in data[ticker]){
             try {
 
-                s = "INSERT INTO " + replacedTicker + " (datetime, price) VALUES (\'" + time + "\', " + data[ticker][time] + ");";
+                s = "INSERT INTO " + replacedTicker + " (dt, price) VALUES (CONVERT(DATETIME, \'" + time + "\'), " + data[ticker][time] + ");";
                 console.log(ticker + ":" + time + ":" + data[ticker][time])
                 const result = await sql.query(s);
                 
@@ -224,7 +224,7 @@ app.get('/request', (req, res) => {
         establishConnection.then((message) => {
             console.log(message);
             if(checkToken(token)){
-                getData(res, "SELECT * FROM " + checkTickerSwitch(ticker) + ";");
+                getData(res, "SELECT * FROM " + checkTickerSwitch(ticker) + " WHERE dt BETWEEN \'" + start + "\' AND \'" + end + "\';");
             } else {
                 res.json({
                     success: false,
