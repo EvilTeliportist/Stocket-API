@@ -4,6 +4,7 @@ const sql = require('mssql')
 const SQLConnectionString = 'mssql://test123:Admin123!@rtstockproject.database.windows.net/StockMarketData?encrypt=true';
 const path = require('path');
 var crypto = require("crypto-js");
+const nodemailer = require('nodemailer');
 
 
 const app = express();
@@ -39,7 +40,34 @@ function generate_token(length){
     return b.join("");
 }
 
+function isSQL(p){
+    return p.includes("'") || p.includes('"') || p.includes(";") 
+}
 
+function sendEmailAlert(ticker, time, price, err){
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'evilteliportist@gmail.com',
+          pass: 'jklntcfy'
+        }
+    });
+    
+    var mailOptions = {
+    from: 'evilteliportist@gmail.com',
+    to: 'evilteliportist@gmail.com',
+    subject: 'Stocket Error Reported',
+    text: 'There was an error processing ' + ticker + " at " + time + " and price " + price + "\n\n\n" + err
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+}
 
 // Async Functions ---------------------------------------
 async function getData(res, s){
@@ -47,10 +75,16 @@ async function getData(res, s){
 
     const result = await sql.query(s);
 
-    res.json(result)
+    res.json({
+        success: true,
+        message: "Success!",
+        data: result
+    })
 }
 
 async function addData(res, data){
+
+    sqlError = false;
 
     for (var ticker in data){
         replacedTicker = checkTickerSwitch(ticker)
@@ -58,18 +92,26 @@ async function addData(res, data){
             try {
 
                 s = "INSERT INTO " + replacedTicker + " (datetime, price) VALUES (\'" + time + "\', " + data[ticker][time] + ");";
-                console.log(ticker + ":" + time)
-                // const result = await sql.query(s);
+                console.log(ticker + ":" + time + ":" + data[ticker][time])
+                const result = await sql.query(s);
                 
             } catch (error) {
                 console.log(error);
+                sqlError = true;
+                sendEmailAlert(ticker, time, data[ticker][price], error.toString())
             }
         }
     }
 
-    res.json({
-        "error":"none"
-    })
+    if (sqlError){
+        res.json({
+            "error":"sql"
+        })
+    } else {
+        res.json({
+            "error":"none"
+        })
+    }
 }
 
 async function validateUser(res, email, pass){
@@ -134,6 +176,16 @@ async function dashData(res, email, pass){
     });
 }
 
+async function checkToken(token){
+    s = "SELECT * FROM users WHERE token = '" + token + "';"
+    result = await sql.query(s)
+
+    if (result.recordset.length > 0){
+        return true;
+    } else {
+        return false;
+    }
+}
 
 
 // Server request pathways -------------------------------
@@ -145,29 +197,45 @@ app.get('/request', (req, res) => {
     var ticker = req.body.ticker;
     var start = req.body.start;
     var end = req.body.end;
+    var token = req.body.token;
 
-    console.log(ticker)
+    if (isSQL(ticker) || isSQL(start) || isSQL(end) || isSQL(token)){
+        res.json({
+            success: false,
+            message: "bad chars"
+        })
+    } else {
 
-    // Establish a connection to the database first
-    let establishConnection = new Promise((resolve, reject) => {
-        sql.connect(SQLConnectionString, function (err){
-            if (err) {
-                console.log(err)
-                reject("Connection Failed");
+        console.log(ticker)
+
+        // Establish a connection to the database first
+        let establishConnection = new Promise((resolve, reject) => {
+            sql.connect(SQLConnectionString, function (err){
+                if (err) {
+                    console.log(err)
+                    reject("Connection Failed");
+                } else {
+                    resolve('Connection Succeeded');
+                }
+            });
+        })
+
+        // Execute query after promise
+        establishConnection.then((message) => {
+            console.log(message);
+            if(checkToken(token)){
+                getData(res, "SELECT * FROM " + checkTickerSwitch(ticker) + ";");
             } else {
-                resolve('Connection Succeeded');
+                res.json({
+                    success: false,
+                    message: "Invalid Token",
+                    data: {}
+                })
             }
+        }).catch((message) => {
+            console.log(message);
         });
-    })
-
-    // Execute query after promise
-    establishConnection.then((message) => {
-        console.log(message);
-        getData(res, "SELECT * FROM " + checkTickerSwitch(ticker) + ";");
-    }).catch((message) => {
-        console.log(message);
-    });
-    
+    }
 });
 
 app.post('/update', (req, res) => {
@@ -205,7 +273,7 @@ app.post('/add_user', (req, res) => {
     p = req.body.password;
 
     // Check if anything includes bad characters
-    if (p.includes("'") || p.includes('"') || p.includes(";") || email.includes("'") || email.includes('"') || email.includes(";")){
+    if (isSQL(p) || isSQL(email)){
         res.json({
             success: false,
             message: 'bad chars'
@@ -239,7 +307,7 @@ app.post('/sign_in', (req, res) => {
     email = req.body.email;
     p = req.body.password;
 
-    if (p.includes("'") || p.includes('"') || p.includes(";") || email.includes("'") || email.includes('"') || email.includes(";")){
+    if (isSQL(p) || isSQL(email)){
         res.json({
             success: false,
             message: 'bad chars'
@@ -295,6 +363,7 @@ app.post('/dashboard_data', (req, res) => {
         console.log(message)
     });
 });
+
 
 // Start Listening -----------------------------------------
 const port = process.env.PORT || 8888;
