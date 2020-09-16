@@ -3,6 +3,9 @@ var pass = $.cookie('password');
 
 const info = {'email':email, 'password': pass}
 
+if (!document.cookie.match(/^(.*;)?\s*email\s*=\s*[^;]+(.*)?$/)){
+    window.location.href = "https://rtstockdata.azurewebsites.net/";
+}
 
 fetch("https://rtstockdata.azurewebsites.net/dashboard_data", {
     method: "POST",
