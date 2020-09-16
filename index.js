@@ -91,7 +91,7 @@ async function addData(res, data){
         for (var time in data[ticker]){
             try {
 
-                s = "INSERT INTO " + replacedTicker + " (dt, price) VALUES (CONVERT(DATETIME, \'" + time + "\'), " + data[ticker][time] + ");";
+                s = "INSERT INTO " + replacedTicker + " (dt, price) VALUES (CONVERT(SMALLDATETIME, \'" + time + "\'), " + data[ticker][time] + ");";
                 console.log(ticker + ":" + time + ":" + data[ticker][time])
                 const result = await sql.query(s);
                 
