@@ -4,7 +4,6 @@ const sql = require('mssql')
 const SQLConnectionString = 'mssql://test123:Admin123!@rtstockproject.database.windows.net/StockMarketData?encrypt=true';
 const path = require('path');
 var crypto = require("crypto-js");
-const nodemailer = require('nodemailer');
 
 
 const app = express();
@@ -44,30 +43,6 @@ function isSQL(p){
     return p.includes("'") || p.includes('"') || p.includes(";") 
 }
 
-function sendEmailAlert(ticker, time, price, err){
-    var transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'stocketapi@gmail.com',
-          pass: 'Jklntcfy123'
-        }
-    });
-    
-    var mailOptions = {
-    from: 'stocketapi@gmail.com',
-    to: 'brhoulton@gmail.com',
-    subject: 'Stocket Error Reported',
-    text: 'There was an error processing ' + ticker + " at " + time + " and price " + price + "\n\n\n" + err
-    };
-
-    transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-      });
-}
 
 // Async Functions ---------------------------------------
 async function getData(res, s){
@@ -108,7 +83,6 @@ async function addData(res, data){
             } catch (error) {
                 console.log(error);
                 sqlError = true;
-                sendEmailAlert(ticker, time, data[ticker][time], error.toString())
             }
         }
     }
