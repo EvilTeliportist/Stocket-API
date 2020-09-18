@@ -1,10 +1,5 @@
-import requests
-from bs4 import BeautifulSoup as soup
+from pystocket import Stocket
 
-response = requests.get('https://markets.businessinsider.com/stocks/aapl-stock', timeout=3)
-parsed = soup(response.text, 'html.parser')
+stocket = Stocket('<your token here>')
 
-
-price = float(parsed.find_all('div', attrs={'class':'price-section__values'})[0].find('span').text.replace(",", ""))
-
-print(price)
+print(stocket.get('MSFT', '2020-09-17 09:38', '2020-09-17 09:50'))

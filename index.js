@@ -73,13 +73,23 @@ function sendEmailAlert(ticker, time, price, err){
 async function getData(res, s){
     connection = await sql.connect(SQLConnectionString);
 
-    const result = await sql.query(s);
+    try {
+        const result = await sql.query(s);
 
-    res.json({
-        success: true,
-        message: "Success!",
-        data: result
-    })
+        res.json({
+            success: true,
+            message: "Success!",
+            data: result
+        })
+
+    } catch (UnhandledPromiseRejectionWarning){
+        res.json({
+            success: false,
+            message: "Invalid Ticker",
+            data: {}
+        })
+    }
+    
 }
 
 async function addData(res, data){
@@ -170,7 +180,6 @@ async function addUser(res, email, pass){
 async function dashData(res, email, pass){
     s = "SELECT token FROM users WHERE email = \'" + email + "\' AND password = \'" + pass + "\';"
     result = await sql.query(s)
-    console.log(result)
     res.json({
         token: result.recordset[0].token
     });
@@ -179,6 +188,7 @@ async function dashData(res, email, pass){
 async function checkToken(token){
     s = "SELECT * FROM users WHERE token = '" + token + "';"
     result = await sql.query(s)
+
 
     if (result.recordset.length > 0){
         return true;
@@ -199,6 +209,7 @@ app.get('/request', (req, res) => {
     var end = req.body.end;
     var token = req.body.token;
 
+
     if (isSQL(ticker) || isSQL(start) || isSQL(end) || isSQL(token)){
         res.json({
             success: false,
@@ -206,7 +217,6 @@ app.get('/request', (req, res) => {
         })
     } else {
 
-        console.log(ticker)
 
         // Establish a connection to the database first
         let establishConnection = new Promise((resolve, reject) => {
@@ -223,18 +233,20 @@ app.get('/request', (req, res) => {
         // Execute query after promise
         establishConnection.then((message) => {
             console.log(message);
-            if(checkToken(token)){
-                getData(res, "SELECT * FROM " + checkTickerSwitch(ticker) + " WHERE dt BETWEEN \'" + start + "\' AND \'" + end + "\';");
-            } else {
-                res.json({
-                    success: false,
-                    message: "Invalid Token",
-                    data: {}
-                })
-            }
-        }).catch((message) => {
-            console.log(message);
-        });
+            checkToken(token).then(tokenValid => {
+                if (tokenValid){
+                    getData(res, "SELECT * FROM " + checkTickerSwitch(ticker) + " WHERE dt BETWEEN \'" + start + "\' AND \'" + end + "\';");
+                } else {
+                    res.json({
+                        success: false,
+                        message: "Invalid Token",
+                        data: {}
+                    })
+                }
+            }).catch((message) => {
+                console.log(message);
+            });
+        })
     }
 });
 
@@ -280,7 +292,6 @@ app.post('/add_user', (req, res) => {
         })
     } else {
         password = crypto.SHA256(p).toString(crypto.enc.Hex);
-        console.log(password)
 
         let establishConnection = new Promise((resolve, reject) => {
             sql.connect(SQLConnectionString, function (err){
