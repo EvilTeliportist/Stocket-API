@@ -3,12 +3,24 @@ const express = require('express');
 const sql = require('mssql')
 const SQLConnectionString = 'mssql://test123:Admin123!@rtstockproject.database.windows.net/StockMarketData?encrypt=true';
 const path = require('path');
-var crypto = require("crypto-js");
+const crypto = require("crypto-js");
+const rateLimit = require('express-rate-limit')
 
+
+const apiLimiter = rateLimit({
+    windowMs: 1000 * 15,
+    max: 1,
+    message: {
+        success: false,
+        message: "Too many requests"
+    }
+})
 
 const app = express();
 app.use(express.json());
 app.use(express.static(__dirname + '/pages'));
+app.use("/request", apiLimiter)
+
 
 
 
