@@ -24,7 +24,7 @@ app.use("/request", apiLimiter)
 app.use(favicon(__dirname + "/pages/resources/logo.ico")); 
 
 sessions = {}
-MAX_SESSION_TIMEOUT = 1000 * 5 // 15 minute timeout
+MAX_SESSION_TIMEOUT = 1000 * 60 * 30 // 30 minute timeout
 
 
 // Functions --------------------------------------------

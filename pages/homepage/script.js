@@ -1,4 +1,4 @@
-const url = 'http://localhost:8888'
+const url = 'https://rtstockdata.azurewebsites.net'
 const SIGN_UP_URL = url + '/add_user';
 const SIGN_IN_URL = url + '/sign_in';
 const DASH_URL = url + '/dashboard';

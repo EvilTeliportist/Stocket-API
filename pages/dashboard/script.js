@@ -2,7 +2,7 @@ var email = $.cookie("email");
 var pass = $.cookie('password');
 
 const info = {'email':email, 'password': pass}
-const url = "http://localhost:8888/"
+const url = "https://rtstockdata.azurewebsites.net/"
 
 // Get cookie
 function getCookie(cname) {
