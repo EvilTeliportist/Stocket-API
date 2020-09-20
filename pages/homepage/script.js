@@ -1,7 +1,50 @@
-const URL = 'https://rtstockdata.azurewebsites.net/'
+const url = 'http://localhost:8888'
 const SIGN_UP_URL = url + '/add_user';
 const SIGN_IN_URL = url + '/sign_in';
-const DASH_URL = url + '/dashboard'
+const DASH_URL = url + '/dashboard';
+
+
+// Get cookie
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+
+// Send session ID to see if valid first
+sessionID = getCookie("sessionID")
+console.log(sessionID)
+session_info = {
+    email: "",
+    password: "", 
+    sessionID: sessionID
+}
+fetch(SIGN_IN_URL, {
+    method: "POST",
+    body: JSON.stringify(session_info),
+    headers: {
+        'content-type':'application/json',
+        'Accept': 'application/json'
+    }
+}).then(res => res.json()).then(data => {
+    if (data.success){
+        document.cookie = 'sessionID='+data.sessionID;
+        window.location.href = DASH_URL;
+    }
+})
+
+
 
 $("form").submit(function(e){
     e.preventDefault();
@@ -122,7 +165,6 @@ $("#signup-submit").click(function () {
 $("#signin-submit").click(function () {
 
     
-
     // Get inputted data
     const email = $("#signin-content").children()[0].value;
     const p1 = $("#signin-content").children()[1].value;

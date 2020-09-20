@@ -2,22 +2,42 @@ var email = $.cookie("email");
 var pass = $.cookie('password');
 
 const info = {'email':email, 'password': pass}
-const url = "https://rtstockdata.azurewebsites.net/"
+const url = "http://localhost:8888/"
 
-if (!document.cookie.match(/^(.*;)?\s*email\s*=\s*[^;]+(.*)?$/)){
-    window.location.href = url;
-}
+// Get cookie
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
 
-fetch(url + "/dashboard_data", {
+sessionID = getCookie("sessionID")
+
+fetch(url + "dashboard_data", {
     method: "POST",
-    body: JSON.stringify(info),
+    body: JSON.stringify({sessionID: sessionID}),
     headers: {
         'content-type':'application/json',
         'Accept': 'application/json'
     }
 }).then(res => res.json()).then(data => {
-    $("#token").text(data.token);
-    console.log(data.token)
+    if (data.message == 'redirect'){
+        window.location.href = url;
+    } else {
+        $("#token").text(data.token);
+        console.log(data.token)
+    }
+
 });
 
 showingInfo = false;

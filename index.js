@@ -24,6 +24,7 @@ app.use("/request", apiLimiter)
 app.use(favicon(__dirname + "/pages/resources/logo.ico")); 
 
 sessions = {}
+MAX_SESSION_TIMEOUT = 1000 * 5 // 15 minute timeout
 
 
 // Functions --------------------------------------------
@@ -55,6 +56,29 @@ function generate_token(length){
 
 function isSQL(p){
     return p.includes("'") || p.includes('"') || p.includes(";") 
+}
+
+function getAllValidSessionIDs(){
+    temp = []
+    for (var email in sessions){
+        if (Date.now() - sessions[email][0] > MAX_SESSION_TIMEOUT){
+            delete sessions[email];
+        } else {
+            temp.push(sessions[email][1])
+        }
+    }
+
+    return temp
+}
+
+function getEmailFromSessions(id){
+    for (var email in sessions){
+        if (sessions[email][1] == id){
+            return email;
+        }
+    }
+
+    return '';
 }
 
 
@@ -112,28 +136,49 @@ async function addData(res, data){
     }
 }
 
-async function validateUser(res, email, pass){
-    // Does user with email even exist?
-    result = await sql.query("SELECT * FROM users WHERE email = \'" + email + "\';");
-    doesUserExist = result.recordset.length != 0;
-    if (doesUserExist){
-        if (pass == result.recordset[0]['password']){
-            res.json({
-                success: true,
-                message: "redirect to dashboard"
-            })
+async function validateUser(res, email, pass, sessionIDFromClient){
+
+    allSessionIDs = getAllValidSessionIDs();
+    if (allSessionIDs.includes(sessionIDFromClient)){
+        // Log in if session ID is valid
+        res.json({
+            success: true,
+            message: "redirect to dashboard",
+            sessionID: sessionIDFromClient
+        })
+
+    } else {
+
+        // Does user with email even exist?
+        result = await sql.query("SELECT * FROM users WHERE email = \'" + email + "\';");
+        doesUserExist = result.recordset.length != 0;
+        if (doesUserExist){
+            if (pass == result.recordset[0]['password']){
+                
+                sessionID = generate_token(40)
+                now = Date.now()
+                sessions[email] = [now, sessionID];
+                
+                res.json({
+                    success: true,
+                    message: "redirect to dashboard",
+                    sessionID: sessionID
+                })
+
+            } else {
+                res.json({
+                    success: false,
+                    message: "Password is incorrect."
+                })
+            }
         } else {
             res.json({
                 success: false,
-                message: "Password is incorrect."
+                message: "No user with this email exists."
             })
         }
-    } else {
-        res.json({
-            success: false,
-            message: "No user with this email exists."
-        })
-    }
+
+    }  
 }
 
 async function addUser(res, email, pass){
@@ -152,10 +197,17 @@ async function addUser(res, email, pass){
         s = "SELECT * FROM users WHERE email = \'" + email + "\';"
         result = await sql.query(s)
         if (result.recordset.length != 0){
+
+            sessionID = generate_token(40);
+            now = Date.now();
+            sessions[email] = [now, sessionID];
+
             res.json({
                 success: true,
-                message: "Success!"
+                message: "Success!",
+                sessionID: sessionID
             })
+
         } else {
             res.json({
                 success: false,
@@ -165,12 +217,23 @@ async function addUser(res, email, pass){
     }
 }
 
-async function dashData(res, email, pass){
-    s = "SELECT token FROM users WHERE email = \'" + email + "\' AND password = \'" + pass + "\';"
-    result = await sql.query(s)
-    res.json({
-        token: result.recordset[0].token
-    });
+async function dashData(res, sessionIDFromClient){
+
+    if (getAllValidSessionIDs().includes(sessionIDFromClient)){
+        email = getEmailFromSessions(sessionIDFromClient)
+        s = "SELECT token FROM users WHERE email = \'" + email + "\';"
+        result = await sql.query(s)
+        res.json({
+            token: result.recordset[0].token
+        });
+    } else {
+        res.json({
+            success: false,
+            message: 'redirect'
+        })
+    }
+
+    
 }
 
 async function checkToken(token){
@@ -305,6 +368,8 @@ app.post('/add_user', (req, res) => {
 app.post('/sign_in', (req, res) => {
     email = req.body.email;
     p = req.body.password;
+    sessionID = req.body.sessionID;
+
 
     if (isSQL(p) || isSQL(email)){
         res.json({
@@ -328,7 +393,7 @@ app.post('/sign_in', (req, res) => {
         // Execute query after promise
         establishConnection.then((message) => {
             console.log(message)
-            validateUser(res, email, password);
+            validateUser(res, email, password, sessionID);
         }).catch((message) => {
             console.log(message)
         });
@@ -341,8 +406,7 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.post('/dashboard_data', (req, res) => {
-    email = req.body.email;
-    password = crypto.SHA256(req.body.password).toString(crypto.enc.Hex);
+    sessionIDFromClient = req.body.sessionID;
 
     let establishConnection = new Promise((resolve, reject) => {
         sql.connect(SQLConnectionString, function (err){
@@ -357,7 +421,7 @@ app.post('/dashboard_data', (req, res) => {
 
      // Execute query after promise
      establishConnection.then((message) => {
-        dashData(res, email, password);
+        dashData(res, sessionIDFromClient);
     }).catch((message) => {
         console.log(message)
     });
