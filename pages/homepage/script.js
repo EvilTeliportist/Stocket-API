@@ -1,6 +1,7 @@
-
-const SIGN_UP_URL = 'https://rtstockdata.azurewebsites.net/add_user';
-const SIGN_IN_URL = 'https://rtstockdata.azurewebsites.net/sign_in';
+const URL = 'https://rtstockdata.azurewebsites.net/'
+const SIGN_UP_URL = url + '/add_user';
+const SIGN_IN_URL = url + '/sign_in';
+const DASH_URL = url + '/dashboard'
 
 $("form").submit(function(e){
     e.preventDefault();
@@ -105,9 +106,8 @@ $("#signup-submit").click(function () {
                 $("#passconfirm").attr("placeholder", "suspicous letters...")
             } else if(data.success){
                 console.log("Log in was a success!");
-                document.cookie = 'email='+email;
-                document.cookie = 'password='+p1;
-                window.location.href = 'https://rtstockdata.azurewebsites.net/dashboard'
+                document.cookie = 'sessionID='+data.sessionID;
+                window.location.href = DASH_URL
             }
         });
     } else {
@@ -164,9 +164,8 @@ $("#signin-submit").click(function () {
             $("#signin-password").attr("placeholder", "suspicous letters...")
         } else if (data.success){
             console.log("Log in was a success!");
-            document.cookie = 'email='+email;
-            document.cookie = 'password='+p1;
-            window.location.href = 'https://rtstockdata.azurewebsites.net/dashboard'
+            document.cookie = 'sessionID='+data.sessionID;
+            window.location.href = DASH_URL
         }
     });
 

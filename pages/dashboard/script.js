@@ -2,12 +2,13 @@ var email = $.cookie("email");
 var pass = $.cookie('password');
 
 const info = {'email':email, 'password': pass}
+const url = "https://rtstockdata.azurewebsites.net/"
 
 if (!document.cookie.match(/^(.*;)?\s*email\s*=\s*[^;]+(.*)?$/)){
-    window.location.href = "https://rtstockdata.azurewebsites.net/";
+    window.location.href = url;
 }
 
-fetch("https://rtstockdata.azurewebsites.net/dashboard_data", {
+fetch(url + "/dashboard_data", {
     method: "POST",
     body: JSON.stringify(info),
     headers: {

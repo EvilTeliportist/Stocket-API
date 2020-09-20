@@ -4,7 +4,8 @@ const sql = require('mssql')
 const SQLConnectionString = 'mssql://test123:Admin123!@rtstockproject.database.windows.net/StockMarketData?encrypt=true';
 const path = require('path');
 const crypto = require("crypto-js");
-const rateLimit = require('express-rate-limit')
+const rateLimit = require('express-rate-limit');
+const favicon = require('serve-favicon');
 
 
 const apiLimiter = rateLimit({
@@ -20,8 +21,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname + '/pages'));
 app.use("/request", apiLimiter)
+app.use(favicon(__dirname + "/pages/resources/logo.ico")); 
 
-
+sessions = {}
 
 
 // Functions --------------------------------------------

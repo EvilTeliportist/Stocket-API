@@ -17,6 +17,7 @@
         "nodemailer": "^6.4.11",
         "nodemon": "^2.0.4",
         "path": "^0.12.7",
+        "serve-favicon": "^2.5.0",
         "tedious": "^9.2.1",
         "tedious-connection-pool": "^1.0.5"
     }
