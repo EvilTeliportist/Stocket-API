@@ -427,7 +427,9 @@ app.post('/dashboard_data', (req, res) => {
     });
 });
 
-
+app.get('/devblog', (req, res) => {
+    res.sendFile(path.join(__dirname, '/pages/devblog/index.html'))
+});
 // Start Listening -----------------------------------------
 const port = process.env.PORT || 8888;
 app.listen(port, () => {

@@ -1,6 +1,7 @@
 #content-wrapper {
     background-color:orange;
     display: flex;
+    height: auto;
     flex-direction: column;
     justify-content: center;
     text-align: center;
@@ -13,13 +14,14 @@
 
 #text {
     font-family: 'Overpass';
-    font-size: 32px;
+    font-size: 2vw;
     color: white;
+    margin-top: 10px;
 }
 
 #token {
     font-family: 'Overpass';
-    font-size: 32px;
+    font-size: 2vw;
     color: white;
 }
 
@@ -31,12 +33,11 @@
     border-radius: 5px;
 }
 
-img {
+#logo {
+    width: 15%;
     filter: invert(1);
-    width:350px;
-    height:350px;
-    margin: 0 auto;
-    margin-bottom: 20px;
+    margin: 0px auto;
+    margin-top: 40px;
 }
 
 .info {
@@ -45,6 +46,7 @@ img {
     cursor: pointer;
     transition: .3s;
     opacity: 1;
+    filter: invert(1);
 }
 
 .info:hover{
@@ -53,7 +55,6 @@ img {
 
 a {
     font-family: 'Overpass';
-    font-size: 32px;
     color: #777777;
     text-decoration: none;
     transition: .3s;
@@ -66,10 +67,11 @@ a:hover {
 
 #main-content {
     width: 80%;
+    height: 100%;
     margin: 10px auto;
+    margin-top: 60px;
     background-color: white;
     border-radius: 10px;
-    font-size: 32px;
     padding: 10px;
     padding-left: 30px;
     padding-bottom: 0px;
@@ -81,12 +83,12 @@ a:hover {
 
 h2 {
     margin-bottom: 10px;
-    font-size: 40px;
+    font-size: 2vw;
 }
 
 #break2 {
     height: 3px;
-    margin: 10px 0;
+    margin: 6px 0;
     background-color: #555555;
     width: 30%;
     border-radius: 5px;
@@ -94,13 +96,13 @@ h2 {
 
 p {
     margin: 10 0;
-    font-size: 28px;
+    font-size: 1.4vw;
 }
 
 #x {
     position: relative;
-    width: 50px;
-    height: 50px;
+    width: 2vw;
+    height: 2vw;
     filter: invert(30%);
     float: right;
     cursor: pointer;
@@ -110,4 +112,8 @@ p {
 
 #x:hover {
     filter: invert(70%);
+}
+
+br {
+    font-size: 1vw;
 }

@@ -124,13 +124,14 @@ input[type='submit']:hover {
 }
 
 #icon {
+    width:70%;
     filter: invert(1);
     margin-top: 100px;
 }
 
 #icon-name {
     color: white;
-    font-size: 96px;
+    font-size: 5vw;
     font-family: 'Overpass';
     letter-spacing: .2em;
 }
