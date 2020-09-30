@@ -248,6 +248,32 @@ async function checkToken(token){
     }
 }
 
+async function addDividendData(res, data){
+    sqlError = false;
+
+
+    for (i = 0; i < data.length; i++){
+        try{
+            dict = data[i]
+            s = "INSERT INTO dividends (ticker, exdate, boughtAt, soldAt, profit, volume, dividendAmount)" +
+            " VALUES (\'" + dict['ticker'] + "\', \'" + dict['exdate'] + "\', " + dict['boughtAt'] + ", " +
+            dict['soldAt'] + ", " + dict['profit'] + ", " + dict['volume'] + ", " + dict['amount'] + ");"
+            const result = await sql.query(s);
+            console.log(dict['ticker'])
+        } catch {
+            console.log('error updating dividends')
+            res.json({
+                'error': true
+            })
+            return
+        }
+            
+    }
+
+    res.json({
+        'error': false
+    })
+}
 
 // Server request pathways -------------------------------
 app.get('/', (req, res) => {
@@ -430,6 +456,37 @@ app.post('/dashboard_data', (req, res) => {
 app.get('/devblog', (req, res) => {
     res.sendFile(path.join(__dirname, '/pages/devblog/index.html'))
 });
+
+app.post('/dividend_update', (req, res) => {
+    var hash = req.body.hash;
+    var data = req.body.data;
+
+    if (hash == '7A6ECCDB792062797AA4F6BEE12199219EC8749641BA50B3138DD4857A65173D'){
+        
+        var data = req.body.data;
+        
+        // Establish a connection to the database first
+        let establishConnection = new Promise((resolve, reject) => {
+            sql.connect(SQLConnectionString, function (err){
+                if (err) {
+                    console.log(err)
+                    reject("Connection Failed");
+                } else {
+                    resolve('Connection Succeeded');
+                }
+            });
+        })
+
+        // Execute query after promise
+        establishConnection.then((message) => {
+            console.log(message)
+            addDividendData(res, data)
+        }).catch((message) => {
+            console.log(message)
+        });
+    }
+});
+
 // Start Listening -----------------------------------------
 const port = process.env.PORT || 8888;
 app.listen(port, () => {
