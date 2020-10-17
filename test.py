@@ -1,5 +1,8 @@
-from pystocket import Stocket
+import requests
 
-stocket = Stocket('<your token here>')
+# Make requests and get server response
+url = "https://rtstockdata.azurewebsites.net/dividends"
+headers = {'Content-Type': "application/json", 'Accept': "application/json"}
+response = requests.get(url, headers=headers, json={'token': 'UkV3i6ovBjVXI8bjeD4px8PSdQJR2VuVRyKl9CgE'})
 
-print(stocket.get('MSFT', '2020-09-17 09:38', '2020-09-17 09:50'))
+print(response.json()['message'])
